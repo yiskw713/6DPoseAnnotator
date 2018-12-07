@@ -251,10 +251,14 @@ if __name__ == "__main__":
 
     cv2.destroyAllWindows()
 
+    
+
     """ Save output files """
     o3.write_point_cloud( "cloud_rot_ds.ply", CLOUD_ROT )
     
     cloud_m.transform( all_transformation )
+    im_label = mapping.Cloud2Image( cloud_m )
+    cv2.imwrite( "label.png", im_label ) 
     o3.write_point_cloud( "cloud_rot.ply", cloud_m )
 
     print("\n\nFinal transformation is\n", all_transformation)
