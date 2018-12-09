@@ -34,7 +34,7 @@ def get_argumets():
     parser.add_argument('--intrin', type=str, default='data/realsense_intrinsic.json',
                         help='file name of the camera intrinsic.')
     parser.add_argument('--model', type=str, default='dataset/hammer_1_grasp.pcd',
-                        help='the folder name where the object models are saved (.pcd or .ply).')
+                        help='file name of the object models(.pcd or .ply).')
     parser.add_argument('--task', type=str, default='grasp',
                         help='task name.(choose grasp/hand/pound)')       
     parser.add_argument('--init', type=str, default='data/init.json',
