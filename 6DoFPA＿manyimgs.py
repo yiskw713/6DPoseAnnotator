@@ -35,8 +35,8 @@ def get_argumets():
                         help='file name of the camera intrinsic.')
     parser.add_argument('--model', type=str, default='dataset/hammer_1_grasp.pcd',
                         help='file name of the object models(.pcd or .ply).')
-    parser.add_argument('--task', type=str, default='grasp',
-                        help='task name.(choose grasp/hand/pound)')       
+    parser.add_argument('--task_num', type=str, default='grasp',
+                        help='task name.(choose grasp: 0/hand: 1/pound: 2)')       
     parser.add_argument('--init', type=str, default='data/init.json',
                         help='file name of the initial transformation (.json).')
     
@@ -265,23 +265,26 @@ if __name__ == "__main__":
         
         cloud_m.transform( all_transformation )
         im_label = mapping.Cloud2Image( cloud_m )
-        cv2.imwrite( cimg[:-7] + args.task + "label.png", im_label ) 
-        o3.write_point_cloud( "cloud_rot.ply", cloud_m )
+        cv2.imwrite( cimg[:-7] + '_' + args.task_num + "label.png", im_label ) 
+        # o3.write_point_cloud( "cloud_rot.ply", cloud_m )
 
-        # save label.png as numpy npy
-        # black: 0    background
-        # green: 1    to be grasped
-        # red:   2    to be interacted w/ others
-        # white: 3    others
-        # BGR
+        ''' save label.png as numpy npy
+        black: 0    background
+        green: 1    to be grasped
+        red:   2    to be interacted w/ others
+        white: 3    others
+        BGR
+        '''
         label = np.zeros((480, 640), dtype=np.uint8)
         label[im_label==[0, 255, 0]] = 1
         label[im_label==[0, 0, 255]] = 2
         label[im_label==[255, 255, 255]] = 3
-        np.save(cimg[:-7] + task + '.npy', label, np.uint8)
+        # grasp: 0, hand:1, pound:2
+        np.save(cimg[:-7] + '_' + args.task_num + '.npy', label, np.uint8)
 
-        print("\n\nFinal transformation is\n", all_transformation)
-        print("You can transform the original model to the final pose by multiplying above matrix.")
-        c3D.save_transformation( all_transformation, 'trans.json')
+
+        # print("\n\nFinal transformation is\n", all_transformation)
+        # print("You can transform the original model to the final pose by multiplying above matrix.")
+        # c3D.save_transformation( all_transformation, 'trans.json')
     
 
