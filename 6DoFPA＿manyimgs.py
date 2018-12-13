@@ -154,7 +154,8 @@ if __name__ == "__main__":
 
     img_list = glob.glob(args.img + '/*rgb.png')
 
-    for  cimg in img_list:
+
+    for  i, cimg in enumerate(img_list):
         """Data loading"""
         print(":: Load two point clouds to be matched.")
         color_raw = o3.read_image( cimg )
@@ -185,16 +186,19 @@ if __name__ == "__main__":
 
         """Loading of the initial transformation"""
         initial_trans = np.identity(4)
-        if os.path.exists( args.init ):
-            initial_trans = c3D.load_transformation( args.init )
-            print('Use initial transformation\n', initial_trans )
-            all_transformation = np.dot( initial_trans, all_transformation )
+        if i ==0:
+            if os.path.exists( args.init ):
+                initial_trans = c3D.load_transformation( args.init )
+                print('Use initial transformation\n', initial_trans )
+                all_transformation = np.dot( initial_trans, all_transformation )
+            else:
+                # if initial transformation is not avairable, 
+                # the object model is moved to its center.
+                cloud_m_c, offset = c3D.Centering( cloud_m_ds )
+                mat_centering = c3D.makeTranslation4x4( -1.0*offset )
+                all_transformation = np.dot( mat_centering, all_transformation )
         else:
-            # if initial transformation is not avairable, 
-            # the object model is moved to its center.
-            cloud_m_c, offset = c3D.Centering( cloud_m_ds )
-            mat_centering = c3D.makeTranslation4x4( -1.0*offset )
-            all_transformation = np.dot( mat_centering, all_transformation )
+            pass
 
         CLOUD_ROT = copy.deepcopy(cloud_m_ds)
         CLOUD_ROT.transform( all_transformation )
