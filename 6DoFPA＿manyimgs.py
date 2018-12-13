@@ -152,8 +152,12 @@ if __name__ == "__main__":
 
     args = get_argumets()
 
+    green = np.array([0, 255, 0])
+    red = np.array([0, 0, 255])
+    white = np.array([255, 255, 255])
+        
     img_list = glob.glob(args.img_folder + '/*rgb.png')
-
+    img_list.sort()
 
     for  i, cimg in enumerate(img_list):
         """Data loading"""
@@ -261,11 +265,11 @@ if __name__ == "__main__":
                 generateImage( mapping, im_color )
                 
 
-        cv2.destroyAllWindows()
+        # cv2.destroyAllWindows()
 
         
         """ Save output files """
-        o3.write_point_cloud( "cloud_rot_ds.ply", CLOUD_ROT )
+        # o3.write_point_cloud( "cloud_rot_ds.ply", CLOUD_ROT )
         
         cloud_m.transform( all_transformation )
         im_label = mapping.Cloud2Image( cloud_m )
@@ -280,9 +284,9 @@ if __name__ == "__main__":
         BGR
         '''
         label = np.zeros((480, 640), dtype=np.uint8)
-        label[im_label==[0, 255, 0]] = 1
-        label[im_label==[0, 0, 255]] = 2
-        label[im_label==[255, 255, 255]] = 3
+        label[np.logical_and.reduce(im_label == green, axis=2)] = 1
+        label[np.logical_and.reduce(im_label == red, axis=2)] = 2
+        label[np.logical_and.reduce(im_label == white, axis=2)] = 3
         # grasp: 0, hand:1, pound:2
         np.save(cimg[:-7] + '_' + args.task_num + '.npy', label, np.uint8)
 
@@ -291,4 +295,7 @@ if __name__ == "__main__":
         # print("You can transform the original model to the final pose by multiplying above matrix.")
         # c3D.save_transformation( all_transformation, 'trans.json')
     
+
+    cv2.destroyAllWindows()
+
 
