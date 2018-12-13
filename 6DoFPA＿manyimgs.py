@@ -273,7 +273,7 @@ if __name__ == "__main__":
         
         cloud_m.transform( all_transformation )
         im_label = mapping.Cloud2Image( cloud_m )
-        cv2.imwrite( cimg[:-7] + '_' + args.task_num + "label.png", im_label ) 
+        cv2.imwrite( cimg[:-7] + args.task_num + "label.png", im_label ) 
         # o3.write_point_cloud( "cloud_rot.ply", cloud_m )
 
         ''' save label.png as numpy npy
@@ -288,7 +288,7 @@ if __name__ == "__main__":
         label[np.logical_and.reduce(im_label == red, axis=2)] = 2
         label[np.logical_and.reduce(im_label == white, axis=2)] = 3
         # grasp: 0, hand:1, pound:2
-        np.save(cimg[:-7] + '_' + args.task_num + '.npy', label, np.uint8)
+        np.save(cimg[:-7] + args.task_num + '.npy', label, np.uint8)
 
 
         # print("\n\nFinal transformation is\n", all_transformation)
