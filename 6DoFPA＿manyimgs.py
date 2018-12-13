@@ -35,8 +35,8 @@ def get_argumets():
                         help='file name of the camera intrinsic.')
     parser.add_argument('--model', type=str, default='dataset/hammer_1_grasp.pcd',
                         help='file name of the object models(.pcd or .ply).')
-    parser.add_argument('--task_num', type=str, default='0',
-                        help='task name.(choose grasp: 0/hand: 1/pound: 2)')       
+    parser.add_argument('--task', type=str, default='grasp_0',
+                        help='task name.(choose grasp_0/hand_1/pound_2)')       
     parser.add_argument('--init', type=str, default='data/init.json',
                         help='file name of the initial transformation (.json).')
     
@@ -153,7 +153,7 @@ if __name__ == "__main__":
     args = get_argumets()
 
     green = np.array([0, 255, 0])
-    red = np.array([0, 0, 255])
+    blue = np.array([255, 0, 0])
     white = np.array([255, 255, 255])
         
     img_list = glob.glob(args.img_folder + '/*rgb.png')
@@ -273,7 +273,7 @@ if __name__ == "__main__":
         
         cloud_m.transform( all_transformation )
         im_label = mapping.Cloud2Image( cloud_m )
-        cv2.imwrite( cimg[:-7] + args.task_num + "label.png", im_label ) 
+        cv2.imwrite( cimg[:-7] + args.task + "label.png", im_label ) 
         # o3.write_point_cloud( "cloud_rot.ply", cloud_m )
 
         ''' save label.png as numpy npy
@@ -285,10 +285,10 @@ if __name__ == "__main__":
         '''
         label = np.zeros((480, 640), dtype=np.uint8)
         label[np.logical_and.reduce(im_label == green, axis=2)] = 1
-        label[np.logical_and.reduce(im_label == red, axis=2)] = 2
+        label[np.logical_and.reduce(im_label == blue, axis=2)] = 2
         label[np.logical_and.reduce(im_label == white, axis=2)] = 3
         # grasp: 0, hand:1, pound:2
-        np.save(cimg[:-7] + args.task_num + '.npy', label, np.uint8)
+        np.save(cimg[:-7] + args.task + '.npy', label, np.uint8)
 
 
         # print("\n\nFinal transformation is\n", all_transformation)
@@ -297,5 +297,3 @@ if __name__ == "__main__":
     
 
     cv2.destroyAllWindows()
-
-
