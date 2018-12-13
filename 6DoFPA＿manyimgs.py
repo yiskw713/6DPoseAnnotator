@@ -29,13 +29,13 @@ def get_argumets():
     """
 
     parser = argparse.ArgumentParser( description='Interactive 6DoF pose annotator')
-    parser.add_argument('--folder', type=str, default='./img',
+    parser.add_argument('--img_folder', type=str, default='./img',
                         help='the folder name where RGB images and depth images of the input scene are saved.')
     parser.add_argument('--intrin', type=str, default='data/realsense_intrinsic.json',
                         help='file name of the camera intrinsic.')
     parser.add_argument('--model', type=str, default='dataset/hammer_1_grasp.pcd',
                         help='file name of the object models(.pcd or .ply).')
-    parser.add_argument('--task_num', type=str, default='grasp',
+    parser.add_argument('--task_num', type=str, default='0',
                         help='task name.(choose grasp: 0/hand: 1/pound: 2)')       
     parser.add_argument('--init', type=str, default='data/init.json',
                         help='file name of the initial transformation (.json).')
@@ -152,7 +152,7 @@ if __name__ == "__main__":
 
     args = get_argumets()
 
-    img_list = glob.glob(args.img + '/*rgb.png')
+    img_list = glob.glob(args.img_folder + '/*rgb.png')
 
 
     for  i, cimg in enumerate(img_list):
