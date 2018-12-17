@@ -27,16 +27,14 @@ def get_argumets():
     """
         Parse arguments from command line
     """
-
+    # TODO: model の入力の仕方
     parser = argparse.ArgumentParser( description='Interactive 6DoF pose annotator')
     parser.add_argument('--img_folder', type=str, default='./img',
                         help='the folder name where RGB images and depth images of the input scene are saved.')
     parser.add_argument('--intrin', type=str, default='data/realsense_intrinsic.json',
                         help='file name of the camera intrinsic.')
-    parser.add_argument('--model', type=str, default='dataset/hammer_1_grasp.pcd',
-                        help='file name of the object models(.pcd or .ply).')
-    parser.add_argument('--task', type=str, default='grasp_0',
-                        help='task name.(choose grasp_0/hand_1/pound_2)')       
+    parser.add_argument('--model', type=str, default='dataset/model/hammer1',
+                        help='directory name of the object models(.pcd or .ply).')
     parser.add_argument('--init', type=str, default='data/init.json',
                         help='file name of the initial transformation (.json).')
     
@@ -62,7 +60,8 @@ class Mapping():
         
         img = np.zeros( [self.height, self.width], dtype=np.uint8 )
         
-        cloud_np = np.asarray(cloud_in.points)
+        cloud_np1 = np.asarray(cloud_in.points)
+        cloud_np = cloud_np1[cloud_np1[:,2].argsort()[::-1],:]
         cloud_np = cloud_np[:,:] / cloud_np[:,[2]]
 
         cloud_min = np.min(cloud_np,axis=0)
@@ -70,7 +69,8 @@ class Mapping():
         cloud_mapped = o3.PointCloud()
         cloud_mapped.points = o3.Vector3dVector(cloud_np)
         cloud_mapped.transform(self.camera_intrinsic4x4)
-        cloud_color = np.asarray(cloud_in.colors)
+        cloud_color1 = np.asarray(cloud_in.colors)
+        cloud_color = cloud_color1[cloud_np1[:,2].argsort()[::-1],:]
 
         """ If cloud_in has the field of color, color is mapped into the image. """
         if len(cloud_color) == len(cloud_np):
@@ -159,6 +159,8 @@ if __name__ == "__main__":
     img_list = glob.glob(args.img_folder + '/*rgb.png')
     img_list.sort()
 
+    model_list = glob.glob(args.model + '/*.pcd')
+
     for  i, cimg in enumerate(img_list):
         """Data loading"""
         print(":: Load two point clouds to be matched.")
@@ -181,8 +183,8 @@ if __name__ == "__main__":
         np_pcd = np.asarray(pcd.points)
 
         """Loading of the object model"""
-        print('Loading: {}'.format(args.model))
-        cloud_m = o3.read_point_cloud( args.model )
+        print('Loading: {}'.format(model_list[0]))
+        cloud_m = o3.read_point_cloud(model_list[0])
         """ if you use object model with meter scale, try this code to convert meter scale."""
         #cloud_m = c3D.Scaling( cloud_m, 0.001 )
 
@@ -265,30 +267,31 @@ if __name__ == "__main__":
                 generateImage( mapping, im_color )
                 
 
-        # cv2.destroyAllWindows()
-
-        
         """ Save output files """
         # o3.write_point_cloud( "cloud_rot_ds.ply", CLOUD_ROT )
         
-        cloud_m.transform( all_transformation )
-        im_label = mapping.Cloud2Image( cloud_m )
-        cv2.imwrite( cimg[:-7] + args.task + "label.png", im_label ) 
+        for model in model_list:
+            cloud_m = o3.read_point_cloud(model)
+            cloud_m.transform( all_transformation )
+            im_label = mapping.Cloud2Image( cloud_m )
+            cv2.imwrite( cimg[:-7] + model[-5:-3] + ".png", im_label )
+            label = np.zeros((480, 640), dtype=np.uint8)
+            label[np.logical_and.reduce(im_label == green, axis=2)] = 1
+            label[np.logical_and.reduce(im_label == blue, axis=2)] = 2
+            label[np.logical_and.reduce(im_label == white, axis=2)] = 3
+            
+            ''' save label.png as numpy npy
+                black: 0    background
+                green: 1    to be grasped
+                red:   2    to be interacted w/ others
+                white: 3    others
+                BGR
+            '''
+            # grasp: 0, hand:1, pound:2
+            np.save(cimg[:-7] + model_list[0][-5:-3] + '.npy', label, np.uint8)
+        
         # o3.write_point_cloud( "cloud_rot.ply", cloud_m )
 
-        ''' save label.png as numpy npy
-        black: 0    background
-        green: 1    to be grasped
-        red:   2    to be interacted w/ others
-        white: 3    others
-        BGR
-        '''
-        label = np.zeros((480, 640), dtype=np.uint8)
-        label[np.logical_and.reduce(im_label == green, axis=2)] = 1
-        label[np.logical_and.reduce(im_label == blue, axis=2)] = 2
-        label[np.logical_and.reduce(im_label == white, axis=2)] = 3
-        # grasp: 0, hand:1, pound:2
-        np.save(cimg[:-7] + args.task + '.npy', label, np.uint8)
 
 
         # print("\n\nFinal transformation is\n", all_transformation)
