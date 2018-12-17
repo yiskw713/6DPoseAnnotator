@@ -270,11 +270,16 @@ if __name__ == "__main__":
         """ Save output files """
         # o3.write_point_cloud( "cloud_rot_ds.ply", CLOUD_ROT )
         
-        for model in model_list:
-            cloud_m = o3.read_point_cloud(model)
+        for i, model in enumerate(model_list):
+            if i == 0:
+                pass
+            else:
+                cloud_m = o3.read_point_cloud(model)
+            
             cloud_m.transform( all_transformation )
             im_label = mapping.Cloud2Image( cloud_m )
             cv2.imwrite( cimg[:-7] + model[-5:-3] + ".png", im_label )
+            
             label = np.zeros((480, 640), dtype=np.uint8)
             label[np.logical_and.reduce(im_label == green, axis=2)] = 1
             label[np.logical_and.reduce(im_label == blue, axis=2)] = 2
@@ -288,7 +293,7 @@ if __name__ == "__main__":
                 BGR
             '''
             # grasp: 0, hand:1, pound:2
-            np.save(cimg[:-7] + model_list[0][-5:-3] + '.npy', label, np.uint8)
+            np.save(cimg[:-7] + model_list[-5:-3] + '.npy', label, np.uint8)
         
         # o3.write_point_cloud( "cloud_rot.ply", cloud_m )
 
