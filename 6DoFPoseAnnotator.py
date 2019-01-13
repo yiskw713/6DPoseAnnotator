@@ -33,7 +33,7 @@ def get_argumets():
                         help='the folder name where RGB images and depth images of the input scene are saved.')
     parser.add_argument('--intrin', type=str, default='data/realsense_intrinsic.json',
                         help='file name of the camera intrinsic.')
-    parser.add_argument('--model', type=str, default='dataset/model/hammer1',
+    parser.add_argument('--model_dir', type=str, default='dataset/model/hammer1',
                         help='directory name of the object models(.pcd or .ply).')
     parser.add_argument('--init', type=str, default='data/init.json',
                         help='file name of the initial transformation (.json).')
@@ -153,13 +153,13 @@ if __name__ == "__main__":
     args = get_argumets()
 
     green = np.array([0, 255, 0])
-    blue = np.array([255, 0, 0])
+    red = np.array([255, 0, 255])
     white = np.array([255, 255, 255])
         
     img_list = glob.glob(args.img_folder + '/*rgb.png')
     img_list.sort()
 
-    model_list = glob.glob(args.model + '/*.pcd')
+    model_list = glob.glob(args.model_dir + '/*.pcd')
 
     for  i, cimg in enumerate(img_list):
         """Data loading"""
@@ -278,11 +278,11 @@ if __name__ == "__main__":
             
             cloud_m.transform( all_transformation )
             im_label = mapping.Cloud2Image( cloud_m )
-            cv2.imwrite( cimg[:-7] + model[-5:-3] + ".png", im_label )
+            cv2.imwrite( cimg[:-7] + model[-9:-4] + ".png", im_label )
             
             label = np.zeros((480, 640), dtype=np.uint8)
             label[np.logical_and.reduce(im_label == green, axis=2)] = 1
-            label[np.logical_and.reduce(im_label == blue, axis=2)] = 2
+            label[np.logical_and.reduce(im_label == red, axis=2)] = 2
             label[np.logical_and.reduce(im_label == white, axis=2)] = 3
             
             ''' save label.png as numpy npy
@@ -293,7 +293,7 @@ if __name__ == "__main__":
                 BGR
             '''
             # grasp: 0, hand:1, pound:2
-            np.save(cimg[:-7] + model_list[-5:-3] + '.npy', label, np.uint8)
+            np.save(cimg[:-7] + model[-9:-4] + '.npy', label, np.uint8)
         
         # o3.write_point_cloud( "cloud_rot.ply", cloud_m )
 
