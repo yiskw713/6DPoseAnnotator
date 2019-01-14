@@ -153,7 +153,7 @@ if __name__ == "__main__":
     args = get_argumets()
 
     green = np.array([0, 255, 0])
-    red = np.array([255, 0, 255])
+    blue = np.array([255, 0, 0])
     white = np.array([255, 255, 255])
         
     img_list = glob.glob(args.img_folder + '/*rgb.png')
@@ -282,13 +282,13 @@ if __name__ == "__main__":
             
             label = np.zeros((480, 640), dtype=np.uint8)
             label[np.logical_and.reduce(im_label == green, axis=2)] = 1
-            label[np.logical_and.reduce(im_label == red, axis=2)] = 2
+            label[np.logical_and.reduce(im_label == blue, axis=2)] = 2
             label[np.logical_and.reduce(im_label == white, axis=2)] = 3
             
             ''' save label.png as numpy npy
                 black: 0    background
                 green: 1    to be grasped
-                red:   2    to be interacted w/ others
+                blue:  2    to be interacted w/ others
                 white: 3    others
                 BGR
             '''
