@@ -19,7 +19,7 @@ CLOUD_ROT = o3.PointCloud()
 """ Total transformation"""
 all_transformation = np.identity(4)
 """ Step size for rotation """
-step = 0.1*pi
+step = 0.05*pi
 """ Voxel size for downsampling"""
 voxel_size = 0.005
 
