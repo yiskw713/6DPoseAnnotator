@@ -38,3 +38,23 @@ cv2.imwrite('./dataset/aff/d.png', d)
 
 
 #%%
+import numpy as np
+import cv2
+import glob
+
+
+
+#%%
+
+p = cv2.imread('./dataset/s/ladle2_green_060_task1.png')
+
+h, w, _ = p.shape
+
+for i in range(h):
+    for j in range(w):
+        if p[i, j, 0] == 255 and p[i, j, 1] == 255 and p[i, j, 2] == 255:
+            p[i, j] = [0, 255, 255]
+        
+cv2.imwrite('./dataset/s/s2.png', p)
+
+#%%
